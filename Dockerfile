@@ -14,6 +14,8 @@ RUN mkdir -p media/uploads staticfiles \
     && python manage.py collectstatic --noinput
 
 ENV PORT=3000
+ENV DJANGO_DEBUG=False
+ENV DJANGO_ALLOWED_HOSTS=*
 EXPOSE 3000
 
 CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-3000} --workers 2 --threads 2 --timeout 60"]
