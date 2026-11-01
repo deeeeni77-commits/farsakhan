@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_GET, require_POST
 
@@ -14,6 +14,10 @@ from .services.demo_ocr import get_model_catalog, run_demo_ocr
 def routes_manifest(request):
     manifest_path = Path(settings.BASE_DIR) / "manus-routes.json"
     return JsonResponse(json.loads(manifest_path.read_text(encoding="utf-8")))
+
+
+def health(request):
+    return HttpResponse("ok", content_type="text/plain")
 
 
 def home(request):

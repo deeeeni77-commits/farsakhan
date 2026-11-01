@@ -5,6 +5,7 @@ from . import views
 app_name = "ocr"
 
 urlpatterns = [
+    path("health/", views.health, name="health"),
     path("manus-routes.json", views.routes_manifest, name="routes_manifest"),
     path("", views.home, name="home"),
     path("ocr/", views.ocr_demo, name="demo"),
