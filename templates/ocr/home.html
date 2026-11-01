@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}فارساخوان | تبدیل دست‌نوشته به داده{% endblock %}
+{% block breadcrumb %}نمای کلی{% endblock %}
+{% block content %}
+<section class="hero-section reveal">
+    <div class="hero-copy">
+        <span class="eyebrow"><span class="eyebrow-line"></span> آزمایشگاه تشخیص متن فارسی</span>
+        <h1>دست‌نوشته را به<br><em>داده‌ی قابل استفاده</em> تبدیل کن.</h1>
+        <p>یک محیط آزمایشی برای مقایسه‌ی مدل‌های یادگیری عمیق در تشخیص متن فارسی؛ از تصویر خام تا متن، کلیدواژه و بینش.</p>
+        <div class="hero-actions"><a class="btn btn-primary" href="{% url 'ocr:demo' %}">شروع تشخیص <span>←</span></a><a class="text-link" href="{% url 'ocr:models' %}">معماری‌ها را ببین <span>↗</span></a></div>
+        <div class="hero-meta"><span><b>۳</b> معماری قابل مقایسه</span><span class="meta-separator"></span><span><b>RTL</b> طراحی فارسی‌محور</span></div>
+    </div>
+    <div class="hero-visual">
+        <div class="scan-card">
+            <div class="scan-card-top"><span class="tiny-label">LIVE RECOGNITION</span><span class="live-dot"></span></div>
+            <div class="paper-preview">
+                <span class="scan-corner corner-tl"></span><span class="scan-corner corner-tr"></span><span class="scan-corner corner-bl"></span><span class="scan-corner corner-br"></span>
+                <div class="handwriting">نام شهر: شیراز</div><div class="paper-line line-one"></div><div class="paper-line line-two"></div><div class="paper-line line-three"></div><div class="scan-beam"></div>
+            </div>
+            <div class="scan-result"><div><span class="result-label">خروجی تشخیص</span><strong>نام شهر: شیراز</strong></div><span class="confidence-badge">۹۴.۲٪</span></div>
+        </div>
+        <div class="floating-chip chip-top"><span class="chip-icon">✦</span><span><small>مدل فعال</small><b>CRNN + Attention</b></span></div>
+        <div class="floating-chip chip-bottom"><span class="metric-number">۰.۸</span><span><small>زمان پردازش</small><b>ثانیه</b></span></div>
+    </div>
+</section>
+
+<section class="section-block reveal delay-1">
+    <div class="section-heading"><div><span class="eyebrow">مسیر پردازش</span><h2>از تصویر تا مفهوم، در سه قدم.</h2></div><span class="section-index">۰۱ / جریان کار</span></div>
+    <div class="process-grid">
+        <article class="process-card"><span class="process-number">۰۱</span><div class="process-icon icon-upload">↥</div><h3>تصویر را وارد کن</h3><p>یک نمونه از متن دست‌نویس یا چاپی فارسی را آپلود کن و پیش‌نمایش آن را ببین.</p></article>
+        <article class="process-card highlighted"><span class="process-number">۰۲</span><div class="process-icon icon-model">◈</div><h3>مدل را انتخاب کن</h3><p>تعادل میان دقت و هزینه را با مقایسه‌ی CRNN، ViT و SVTR پیدا کن.</p></article>
+        <article class="process-card"><span class="process-number">۰۳</span><div class="process-icon icon-insight">✧</div><h3>نتیجه را تحلیل کن</h3><p>متن استخراج‌شده، اطمینان مدل و کلیدواژه‌های اصلی را در یک نگاه بخوان.</p></article>
+    </div>
+</section>
+
+<section class="section-block reveal delay-2">
+    <div class="section-heading"><div><span class="eyebrow">نمایش سریع</span><h2>داشبورد پژوهش، نه یک جعبه‌ی سیاه.</h2></div><a class="text-link" href="{% url 'ocr:history' %}">مشاهده تاریخچه <span>↗</span></a></div>
+    <div class="stats-grid">
+        <div class="stat-card"><span class="stat-label">پردازش‌های ثبت‌شده</span><strong>{{ documents_count|stringformat:'02d' }}</strong><small>در این دمو</small></div>
+        <div class="stat-card"><span class="stat-label">بهترین دقت نمونه</span><strong>۹۵.۱<span class="unit">٪</span></strong><small>Vision Transformer</small></div>
+        <div class="stat-card"><span class="stat-label">مدل‌های قابل مقایسه</span><strong>۰۳</strong><small>از سبک تا دقیق</small></div>
+        <div class="stat-card accent-stat"><span class="stat-label">وضعیت سرویس</span><strong class="online-text"><span class="status-dot"></span> آماده</strong><small>برای دریافت تصویر</small></div>
+    </div>
+</section>
+{% endblock %}

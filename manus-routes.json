@@ -1,0 +1,10 @@
+{
+  "routes": [
+    {"path": "/", "title": "فارساخوان"},
+    {"path": "/ocr/", "title": "دمو OCR"},
+    {"path": "/analysis/", "title": "تحلیل متن"},
+    {"path": "/history/", "title": "تاریخچه پردازش"},
+    {"path": "/models/", "title": "مقایسه مدل‌ها"},
+    {"path": "/history/:id/", "title": "جزئیات نتیجه"}
+  ]
+}

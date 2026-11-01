@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}تحلیل متن | فارساخوان{% endblock %}
+{% block breadcrumb %}تحلیل متن{% endblock %}
+{% block content %}
+<section class="page-intro compact reveal"><div><span class="eyebrow"><span class="eyebrow-line"></span> لایه‌ی معنا</span><h1>متن را فقط نخوان؛<br><em>درکش کن.</em></h1><p>کلیدواژه‌ها و خلاصه‌ی خروجی OCR را کنار هم ببین.</p></div>{% if document %}<a href="{% url 'ocr:demo' %}" class="btn btn-primary">پردازش جدید <span>←</span></a>{% endif %}</section>
+{% if document %}
+<section class="analysis-grid reveal delay-1">
+    <div class="analysis-main"><div class="card-heading"><div><span class="panel-kicker">متن ورودی</span><h2>خروجی خوانش‌شده</h2></div><span class="confidence-badge">{{ document.confidence }}٪ اطمینان</span></div><div class="analysis-text">{{ document.extracted_text|linebreaksbr }}</div><div class="analysis-footer"><span>مدل: <strong>{{ document.get_model_name_display }}</strong></span><span>{{ document.created_at|date:'Y/m/d · H:i' }}</span></div></div>
+    <div class="analysis-side"><div class="mini-card"><span class="panel-kicker">کلیدواژه‌ها</span><h3>موضوعات حاضر در متن</h3><div class="keyword-list large">{% for keyword in document.keywords %}<span class="keyword">{{ keyword }}</span>{% empty %}<span>کلیدواژه‌ای ثبت نشده است.</span>{% endfor %}</div></div><div class="mini-card generated-card"><span class="panel-kicker">خلاصه‌ی دمو</span><h3>یک برداشت کوتاه</h3><p>این متن فارسی با مدل {{ document.get_model_name_display }} خوانش شده و درباره‌ی {{ document.keywords|join:', ' }} صحبت می‌کند.</p><div class="generated-line"><span>مدل آماده‌ی اتصال به mT5</span><span>✦</span></div></div></div>
+</section>
+{% else %}<div class="empty-page reveal"><div class="empty-glyph">◌</div><h2>هنوز متنی برای تحلیل نداریم.</h2><p>اول یک تصویر را پردازش کن تا لایه‌ی معنا فعال شود.</p><a class="btn btn-primary" href="{% url 'ocr:demo' %}">رفتن به دمو OCR <span>←</span></a></div>{% endif %}
+{% endblock %}

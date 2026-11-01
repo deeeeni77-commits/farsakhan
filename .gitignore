@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+.env
+.venv/
+venv/
+media/uploads/*
+!media/uploads/.gitkeep
+staticfiles/
+.DS_Store
+.vscode/*
+!.vscode/settings.json

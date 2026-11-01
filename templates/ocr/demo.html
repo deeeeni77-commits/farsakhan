@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}دمو OCR | فارساخوان{% endblock %}
+{% block breadcrumb %}دمو OCR{% endblock %}
+{% block content %}
+<section class="page-intro reveal"><div><span class="eyebrow"><span class="eyebrow-line"></span> فضای آزمایش</span><h1>دست‌نوشته را<br><em>قابل خواندن کن.</em></h1><p>تصویر را وارد کن، معماری را انتخاب کن و مسیر تبدیل تصویر به متن را دنبال کن.</p></div><div class="intro-note"><span class="note-icon">i</span><span>خروجی این صفحه در نسخه‌ی فعلی شبیه‌سازی شده است و قرارداد اتصال به OCR واقعی را حفظ می‌کند.</span></div></section>
+
+<section class="ocr-workspace reveal delay-1">
+    <form id="ocrForm" class="ocr-input-panel" method="post" enctype="multipart/form-data" action="{% url 'ocr:run_ocr' %}">
+        {% csrf_token %}
+        <div class="panel-heading"><div><span class="panel-kicker">مرحله ۱</span><h2>ورودی تصویر</h2></div><span class="panel-status">PNG / JPG / WEBP</span></div>
+        <label class="upload-zone" id="uploadZone" for="id_original_image">
+            <input type="file" name="original_image" id="id_original_image" accept="image/png,image/jpeg,image/webp" hidden>
+            <div class="upload-visual"><span class="upload-arrow">↑</span></div>
+            <strong>تصویرت را اینجا رها کن</strong><span>یا برای انتخاب فایل کلیک کن</span><small>حداکثر حجم فایل: ۵ مگابایت</small>
+        </label>
+        <div class="preview-wrap" id="previewWrap" hidden><div class="preview-header"><span>پیش‌نمایش ورودی</span><button type="button" class="clear-preview" id="clearPreview">پاک کردن</button></div><div class="preview-image-box"><img id="imagePreview" alt="پیش‌نمایش تصویر آپلودشده"><span class="image-tag">INPUT</span></div><p class="file-name" id="fileName"></p></div>
+        <div class="field-block"><label for="id_model_name">معماری تشخیص</label><div class="select-wrap"><select name="model_name" id="id_model_name">{% for model in models %}<option value="{{ model.key }}" {% if forloop.first %}selected{% endif %}>{{ model.name }} — {{ model.fit }}</option>{% endfor %}</select><span>⌄</span></div></div>
+        <button type="submit" class="btn btn-primary btn-full" id="processButton" disabled>اجرای پردازش <span>←</span></button>
+        <div class="form-error" id="formError" hidden></div>
+    </form>
+
+    <div class="ocr-output-panel">
+        <div class="panel-heading"><div><span class="panel-kicker">مرحله ۲</span><h2>خروجی مدل</h2></div><span class="result-state" id="resultState"><span class="state-dot"></span> در انتظار ورودی</span></div>
+        <div class="processing-state" id="processingState" hidden><div class="processing-orbit"><span></span><span></span><span></span></div><strong>در حال خواندن الگوهای متن</strong><p id="processingLabel">پیش‌پردازش تصویر...</p><div class="progress-track"><span id="progressBar"></span></div></div>
+        <div class="empty-result" id="emptyResult"><div class="empty-glyph">⌁</div><strong>نتیجه اینجا ظاهر می‌شود</strong><span>برای شروع، یک تصویر و مدل تشخیص انتخاب کن.</span></div>
+        <div class="result-content" id="resultContent" hidden>
+            <div class="result-topline"><span class="success-mark">✓</span><span>پردازش با موفقیت انجام شد</span><a id="resultDetailLink" href="#">جزئیات ↗</a></div>
+            <div class="recognized-text"><span class="result-label">متن استخراج‌شده</span><p id="recognizedText"></p></div>
+            <div class="result-metrics"><div><span>میزان اطمینان</span><strong id="confidenceValue">—</strong></div><div><span>زمان پردازش</span><strong id="timeValue">—</strong></div><div><span>مدل</span><strong id="modelValue">—</strong></div></div>
+            <div class="keyword-preview"><span class="result-label">کلیدواژه‌های شناسایی‌شده</span><div class="keyword-list" id="keywordList"></div></div>
+            <div class="result-actions"><a class="btn btn-secondary" id="analysisLink" href="#">تحلیل کامل متن <span>↗</span></a><button class="btn btn-ghost" type="button" id="copyResult">کپی متن</button></div>
+        </div>
+    </div>
+</section>
+<section class="tip-strip reveal delay-2"><span class="tip-bulb">✦</span><p><strong>راهنمای انتخاب:</strong> CRNN برای سرعت، ViT برای بیشترین دقت و SVTR برای تعادل میان این دو طراحی شده است.</p><a href="{% url 'ocr:models' %}">مقایسه مدل‌ها ↗</a></section>
+{% endblock %}
+{% block extra_scripts %}<script>window.FARSAKHAN = {ocrUrl: "{% url 'ocr:run_ocr' %}"};</script><script src="{% static 'js/ocr-demo.js' %}"></script>{% endblock %}
