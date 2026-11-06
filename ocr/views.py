@@ -49,7 +49,7 @@ def run_ocr(request):
 
     model_key = form.cleaned_data["model_name"]
     image = form.cleaned_data["original_image"]
-    result = run_demo_ocr(model_key, image.name)
+    result = run_demo_ocr(model_key, image, image.name)
 
     document = form.save(commit=False)
     document.extracted_text = result["text"]

@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+import re
+import time
 from typing import Any
+
+import pytesseract
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 
 MODEL_CATALOG: list[dict[str, Any]] = [
@@ -40,43 +45,75 @@ MODEL_CATALOG: list[dict[str, Any]] = [
 ]
 
 
-_DEMO_OUTPUTS = {
-    "crnn": {
-        "text": "نام شهر: شیراز\nنوع نمونه: دست‌نویس فارسی\nوضعیت: قابل پردازش",
-        "confidence": 91.8,
-        "processing_time": 0.84,
-        "keywords": ["شیراز", "دست‌نویس", "فارسی", "پردازش"],
-    },
-    "vit": {
-        "text": "نام شهر: شیراز\nاین نمونه برای ارزیابی تشخیص متن فارسی آماده شده است.",
-        "confidence": 95.1,
-        "processing_time": 1.47,
-        "keywords": ["شیراز", "ارزیابی", "تشخیص متن", "فارسی"],
-    },
-    "svtr": {
-        "text": "نام شهر: شیراز\nنمونه‌ی آزمایشی با مدل SVTR تحلیل شد.",
-        "confidence": 94.3,
-        "processing_time": 1.08,
-        "keywords": ["شیراز", "SVTR", "آزمایشی", "تحلیل"],
-    },
-}
-
-
 def get_model_catalog() -> list[dict[str, Any]]:
     return MODEL_CATALOG
 
 
-def run_demo_ocr(model_key: str, image_name: str = "") -> dict[str, Any]:
-    """دموی قابل جایگزینی با موتور واقعی OCR.
+def _keywords(text: str) -> list[str]:
+    words = re.findall(
+        r"[\u0600-\u06FF\u200cA-Za-z][\u0600-\u06FF\u200cA-Za-z0-9-]{2,}",
+        text,
+    )
+    ignored = {"برای", "است", "این", "های", "با", "از", "the", "and"}
+    unique: list[str] = []
+    for word in words:
+        normalized = word.strip("،؛,.!:؟")
+        if normalized and normalized.lower() not in ignored and normalized not in unique:
+            unique.append(normalized)
+    return unique[:8]
 
-    در نسخه‌ی بعدی، همین قرارداد می‌تواند به Tesseract، PaddleOCR یا Transformer متصل شود.
+
+def run_demo_ocr(model_key: str, image_file: Any, image_name: str = "") -> dict[str, Any]:
+    """Extract text from the uploaded image using real Persian/English OCR.
+
+    The model selector remains part of the demo UI, but the current deployable
+    engine is Tesseract. It is isolated here so a trained handwritten model can
+    replace it later without changing the views.
     """
-    result = _DEMO_OUTPUTS.get(model_key, _DEMO_OUTPUTS["crnn"]).copy()
-    result["model_key"] = model_key
-    result["source_name"] = image_name
-    result["pipeline"] = [
-        {"label": "حذف نویز و نرمال‌سازی", "status": "done"},
-        {"label": "استخراج ویژگی‌های بصری", "status": "done"},
-        {"label": "تشخیص توالی متن فارسی", "status": "done"},
+    started_at = time.perf_counter()
+    image_file.seek(0)
+    image = Image.open(image_file).convert("RGB")
+    image = ImageOps.exif_transpose(image)
+    image = ImageOps.grayscale(image)
+    image = ImageOps.autocontrast(image)
+    image = image.filter(ImageFilter.SHARPEN)
+    image = ImageEnhance.Contrast(image).enhance(1.25)
+    if max(image.size) < 1800:
+        scale = 1800 / max(image.size)
+        image = image.resize((int(image.width * scale), int(image.height * scale)))
+
+    config = "--oem 1 --psm 6"
+    data = pytesseract.image_to_data(
+        image,
+        lang="fas+eng",
+        config=config,
+        output_type=pytesseract.Output.DICT,
+    )
+    lines = [
+        part.strip()
+        for part in pytesseract.image_to_string(image, lang="fas+eng", config=config).splitlines()
+        if part.strip()
     ]
-    return result
+    text = "\n".join(lines).strip()
+    scores = [
+        float(value)
+        for value in data["conf"]
+        if str(value).strip() not in {"", "-1"}
+    ]
+    confidence = round(max(0.0, min(99.9, sum(scores) / len(scores))) if scores else 0.0, 2)
+    if not text:
+        text = "متنی از این تصویر شناسایی نشد. لطفاً تصویر واضح‌تر و با نور مناسب‌تری بارگذاری کنید."
+
+    return {
+        "text": text,
+        "confidence": confidence,
+        "processing_time": round(time.perf_counter() - started_at, 2),
+        "keywords": _keywords(text),
+        "model_key": model_key,
+        "source_name": image_name,
+        "pipeline": [
+            {"label": "چرخش، حذف نویز و افزایش کنتراست", "status": "done"},
+            {"label": "تشخیص متن فارسی و انگلیسی با Tesseract", "status": "done"},
+            {"label": "تجمیع خطوط و استخراج کلیدواژه‌ها", "status": "done"},
+        ],
+    }
